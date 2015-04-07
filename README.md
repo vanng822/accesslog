@@ -1,6 +1,6 @@
 ## Accesslog
 
-Accesslog is a middleware with implementing func(next http.Handler) http.Handler. See http://en.wikipedia.org/wiki/Common_Log_Format
+Accesslog is a middleware for logging access with interfaces func(next http.Handler) http.Handler and HandlerFuncWithNext(w http.ResponseWriter, r *http.Request, next http.HandlerFunc). See http://en.wikipedia.org/wiki/Common_Log_Format for log format.
 
 ## Example
 
