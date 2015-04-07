@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"time"
+	"strings"
 )
 
 type Logger interface {
@@ -51,12 +52,15 @@ func (l *Log) logging(rw *loggingResponse, r *http.Request) {
 	if userAgent == "" {
 		userAgent = "-"
 	}
+	
+	ip := strings.Split(r.RemoteAddr, ":")[0]
+	
 	// IP user-identifier user-id [datetime] "method url protocol_version" status length "referer" "user-agent"
 	const format = "%s - - [%s] \"%s %s %s\" %d %d \"%s\" \"%s\""
 	// "%d/%b/%Y:%H:%M:%S %z" 
 	const layout = "2/Jan/2006:15:04:05 -0700"
 	l.Logger.Printf(format,
-		r.RemoteAddr,
+		ip,
 		endTime.Format(layout),
 		r.Method,
 		r.URL.String(),
