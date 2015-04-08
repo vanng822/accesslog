@@ -1,10 +1,10 @@
 package accesslog
 
 import (
+	"fmt"
+	"github.com/codegangsta/negroni"
 	"github.com/stretchr/testify/assert"
 	"github.com/vanng822/r2router"
-	"github.com/codegangsta/negroni"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -39,7 +39,7 @@ func TestSeeforRecoveryPrintStack(t *testing.T) {
 	n := negroni.New()
 	log := New()
 	n.UseFunc(log.HandlerFuncWithNext)
-	
+
 	router.Get("/user/keys/:id", func(w http.ResponseWriter, r *http.Request, p r2router.Params) {
 		fmt.Fprint(w, p.Get("id"))
 	})
@@ -55,4 +55,41 @@ func TestSeeforRecoveryPrintStack(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, res.StatusCode, http.StatusOK)
 	assert.Contains(t, string(content), "testing")
+}
+
+type mylog struct {
+	output string
+}
+
+func (m *mylog) Printf(format string, v ...interface{}) {
+	m.output = fmt.Sprintf(format, v...)
+}
+
+func TestLogOutput(t *testing.T) {
+	router := r2router.NewSeeforRouter()
+	log := New()
+	m := &mylog{}
+	log.Logger = m
+	
+	router.Before(log.Handler)
+
+	router.Get("/user/keys/:id", func(w http.ResponseWriter, r *http.Request, p r2router.Params) {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, http.StatusText(http.StatusInternalServerError))
+	})
+
+	ts := httptest.NewServer(router)
+	defer ts.Close()
+
+	// get
+	res, err := http.Get(ts.URL + "/user/keys/testing")
+	assert.Nil(t, err)
+	content, err := ioutil.ReadAll(res.Body)
+	res.Body.Close()
+	assert.Nil(t, err)
+	assert.Equal(t, res.StatusCode, http.StatusInternalServerError)
+	assert.Equal(t, string(content), "Internal Server Error")
+	assert.Contains(t, m.output, "\"GET /user/keys/testing HTTP/1.1\" 500")
+	assert.Contains(t, m.output, "127.0.0.1 - - [")
+	assert.Contains(t, m.output, "Go 1.1 package http")
 }
