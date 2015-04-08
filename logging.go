@@ -35,7 +35,7 @@ func (lrw *loggingResponse) Write(b []byte) (int, error) {
 	return written, err
 }
 
-func NewLog() *Log {
+func New() *Log {
 	l := &Log{
 		Logger: log.New(os.Stdout, "", 0),
 	}

@@ -13,7 +13,7 @@ import (
 
 func TestHandler(t *testing.T) {
 	router := r2router.NewSeeforRouter()
-	log := NewLog()
+	log := New()
 	router.Before(log.Handler)
 
 	router.Get("/user/keys/:id", func(w http.ResponseWriter, r *http.Request, p r2router.Params) {
@@ -37,7 +37,7 @@ func TestHandler(t *testing.T) {
 func TestSeeforRecoveryPrintStack(t *testing.T) {
 	router := r2router.NewRouter()
 	n := negroni.New()
-	log := NewLog()
+	log := New()
 	n.UseFunc(log.HandlerFuncWithNext)
 	
 	router.Get("/user/keys/:id", func(w http.ResponseWriter, r *http.Request, p r2router.Params) {
