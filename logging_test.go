@@ -89,7 +89,5 @@ func TestLogOutput(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, res.StatusCode, http.StatusInternalServerError)
 	assert.Equal(t, string(content), "Internal Server Error")
-	assert.Contains(t, m.output, "\"GET /user/keys/testing HTTP/1.1\" 500")
-	assert.Contains(t, m.output, "127.0.0.1 - - [")
-	assert.Contains(t, m.output, "Go 1.1 package http")
+	assert.Regexp(t, "127.0.0.1 - - \\[.+\\] \"GET /user/keys/testing HTTP/1.1\" 500 21 \"-\" \"Go [.\\d]+ package http", m.output)
 }
