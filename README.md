@@ -17,7 +17,7 @@ import (
 
 func main() {
 	seefor := r2router.NewSeeforRouter()
-	l := accesslog.NewLog()
+	l := accesslog.New()
 	seefor.Before(l.Handler)
 	seefor.Get("/hello/:name", func(w http.ResponseWriter, r *http.Request, p r2router.Params) {
 		fmt.Fprintf(w, "Hello %s!", p.Get("name"))

@@ -11,7 +11,7 @@
 //	
 //	func main() {
 //		seefor := r2router.NewSeeforRouter()
-//		log := accesslog.NewLog()
+//		log := accesslog.New()
 //		seefor.Before(log.Handler)
 //		seefor.Get("/user/keys/:id", func(w http.ResponseWriter, r *http.Request, p r2router.Params) {
 //			fmt.Fprint(w, p.Get("id"))
