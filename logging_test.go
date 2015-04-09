@@ -34,7 +34,7 @@ func TestHandler(t *testing.T) {
 	assert.Equal(t, string(content), "Internal Server Error")
 }
 
-func TestSeeforRecoveryPrintStack(t *testing.T) {
+func TestHandlerFuncWithNext(t *testing.T) {
 	router := r2router.NewRouter()
 	n := negroni.New()
 	log := New()
