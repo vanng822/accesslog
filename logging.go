@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+// Logger defines needed interfaces
+// One can use any logger with this interface
 type Logger interface {
 	Printf(format string, v ...interface{})
 }
@@ -18,6 +20,7 @@ type Log struct {
 	format string
 }
 
+// Wrap ResponseWriter for determination of status and content length
 type LogResponseWriter struct {
 	http.ResponseWriter
 	status        int
@@ -71,6 +74,11 @@ func (l *Log) logging(rw *LogResponseWriter, r *http.Request) {
 		userAgent)
 }
 
+// Middleware implementing fun(next http.Handler) http.Handler
+//
+// router := r2router.NewSeeforRouter()
+// logger := accesslog.New()
+// router.Before(logger.Handler)
 func (l *Log) Handler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		lwr := &LogResponseWriter{rw, 0, 0}
@@ -79,6 +87,11 @@ func (l *Log) Handler(next http.Handler) http.Handler {
 	})
 }
 
+// Middleware implementing func(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc)
+//
+// n := negroni.New()
+// logger := accesslog.New()
+// n.UseFunc(logger.HandlerFuncWithNext)
 func (l *Log) HandlerFuncWithNext(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	lwr := &LogResponseWriter{rw, 0, 0}
 	defer l.logging(lwr, r)
