@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
+	//"os"
 	"strings"
 	"time"
 )
@@ -57,7 +57,7 @@ func (lrw *LogResponseWriter) Write(b []byte) (int, error) {
 
 func New() *Log {
 	l := &Log{
-		Logger: WrapPrint(log.New(os.Stdout, "", 0).Print),
+		Logger: WrapPrint(log.Print),
 	}
 	return l
 }
