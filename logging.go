@@ -1,18 +1,36 @@
 package accesslog
 
 import (
-	//"fmt"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"time"
 	"strings"
+	"time"
 )
 
 // Logger defines needed interfaces
 // One can use any logger with this interface
 type Logger interface {
-	Printf(format string, v ...interface{})
+	Info(m string)
+}
+
+type LoggerFunc func(m string)
+
+func (f LoggerFunc) Info(m string) {
+	f(m)
+}
+
+func WrapPrint(fn func(v ...interface{})) Logger {
+	return LoggerFunc(func(m string) {
+		fn(m)
+	})
+}
+
+func WrapSyslog(fn func(m string) (err error)) Logger {
+	return LoggerFunc(func(m string) {
+		fn(m)
+	})
 }
 
 type Log struct {
@@ -39,7 +57,7 @@ func (lrw *LogResponseWriter) Write(b []byte) (int, error) {
 
 func New() *Log {
 	l := &Log{
-		Logger: log.New(os.Stdout, "", 0),
+		Logger: WrapPrint(log.New(os.Stdout, "", 0).Print),
 	}
 	return l
 }
@@ -54,14 +72,14 @@ func (l *Log) logging(rw *LogResponseWriter, r *http.Request) {
 	if userAgent == "" {
 		userAgent = "-"
 	}
-	
+
 	ip := strings.Split(r.RemoteAddr, ":")[0]
-	
+
 	// IP user-identifier user-id [datetime] "method url protocol_version" status length "referer" "user-agent"
 	const format = "%s - - [%s] \"%s %s %s\" %d %d \"%s\" \"%s\""
-	// "%d/%b/%Y:%H:%M:%S %z" 
+	// "%d/%b/%Y:%H:%M:%S %z"
 	const layout = "2/Jan/2006:15:04:05 -0700"
-	l.Logger.Printf(format,
+	l.Logger.Info(fmt.Sprintf(format,
 		ip,
 		endTime.Format(layout),
 		r.Method,
@@ -70,7 +88,7 @@ func (l *Log) logging(rw *LogResponseWriter, r *http.Request) {
 		rw.status,
 		rw.writtenLength,
 		referer,
-		userAgent)
+		userAgent))
 }
 
 // Middleware implementing fun(next http.Handler) http.Handler
