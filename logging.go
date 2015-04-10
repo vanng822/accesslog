@@ -17,7 +17,6 @@ type Logger interface {
 
 type Log struct {
 	Logger Logger
-	format string
 }
 
 // Wrap ResponseWriter for determination of status and content length
