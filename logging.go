@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	//"os"
 	"strings"
 	"time"
 )
@@ -15,18 +14,21 @@ type Logger interface {
 	Info(m string)
 }
 
+// Turn any logging function with this interface into Logger
 type LoggerFunc func(m string)
 
 func (f LoggerFunc) Info(m string) {
 	f(m)
 }
 
+// Wrap Print function of log.Logger or any similar function
 func WrapPrint(fn func(v ...interface{})) Logger {
 	return LoggerFunc(func(m string) {
 		fn(m)
 	})
 }
 
+// Wrap any syslog.Writer function or any similar function
 func WrapSyslog(fn func(m string) (err error)) Logger {
 	return LoggerFunc(func(m string) {
 		fn(m)
