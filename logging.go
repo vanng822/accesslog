@@ -18,18 +18,18 @@ type Log struct {
 	format string
 }
 
-type loggingResponse struct {
+type LogResponseWriter struct {
 	http.ResponseWriter
 	status        int
 	writtenLength int
 }
 
-func (lrw *loggingResponse) WriteHeader(status int) {
+func (lrw *LogResponseWriter) WriteHeader(status int) {
 	lrw.status = status
 	lrw.ResponseWriter.WriteHeader(status)
 }
 
-func (lrw *loggingResponse) Write(b []byte) (int, error) {
+func (lrw *LogResponseWriter) Write(b []byte) (int, error) {
 	written, err := lrw.ResponseWriter.Write(b)
 	lrw.writtenLength += written
 	return written, err
@@ -42,7 +42,7 @@ func New() *Log {
 	return l
 }
 
-func (l *Log) logging(rw *loggingResponse, r *http.Request) {
+func (l *Log) logging(rw *LogResponseWriter, r *http.Request) {
 	endTime := time.Now()
 	userAgent := r.UserAgent()
 	referer := r.Referer()
@@ -73,14 +73,14 @@ func (l *Log) logging(rw *loggingResponse, r *http.Request) {
 
 func (l *Log) Handler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		lwr := &loggingResponse{rw, 0, 0}
+		lwr := &LogResponseWriter{rw, 0, 0}
 		defer l.logging(lwr, r)
 		next.ServeHTTP(lwr, r)
 	})
 }
 
 func (l *Log) HandlerFuncWithNext(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	lwr := &loggingResponse{rw, 0, 0}
+	lwr := &LogResponseWriter{rw, 0, 0}
 	defer l.logging(lwr, r)
 	next(lwr, r)
 }
