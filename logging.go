@@ -85,7 +85,7 @@ func (l *Log) logging(rw *LogResponseWriter, r *http.Request) {
 		ip,
 		endTime.Format(layout),
 		r.Method,
-		r.URL.String(),
+		r.URL.RequestURI(),
 		r.Proto,
 		rw.status,
 		rw.writtenLength,
